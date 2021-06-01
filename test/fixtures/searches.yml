@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  ticker: MyString
+  type: 
+  timestamp: 2021-06-01 15:50:41
+
+two:
+  ticker: MyString
+  type: 
+  timestamp: 2021-06-01 15:50:41
