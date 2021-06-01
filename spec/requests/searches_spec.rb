@@ -38,6 +38,12 @@ RSpec.describe "/searches", type: :request do
       get searches_url, headers: valid_headers, as: :json
       expect(response).to be_successful
     end
+
+    it "returns the list of searches" do
+      5.times do
+        create(:search)
+      end
+    end
   end
 
   describe "GET /show" do
