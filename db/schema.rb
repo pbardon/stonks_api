@@ -20,7 +20,7 @@ ActiveRecord::Schema.define(version: 2021_06_02_033030) do
     t.float "low"
     t.integer "volume"
     t.datetime "timestamp"
-    t.string "quotetype"
+    t.string "querytype"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
