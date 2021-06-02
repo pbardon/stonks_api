@@ -1,8 +1,6 @@
 class Search < ApplicationRecord
     validates :ticker, presence: true
-
     validates :ticker, length: {maximum: 5}
-
 
     def query_external_api
         ## Execute search, fetch results from API, and return the search object

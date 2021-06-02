@@ -20,5 +20,6 @@ RSpec.describe Search, type: :model do
           result = search.query_external_api()
           expect(result).to be true
       end
+
   end
 end
