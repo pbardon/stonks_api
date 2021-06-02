@@ -1,6 +1,5 @@
 class Price < ApplicationRecord
-    validates :ticker, presence: true
-    validates :ticker, length: {maximum: 5}
+    belongs_to :company, primary_key: :ticker, foreign_key: :company_ticker, class_name: "Company"
 
     validates :open, presence: true
     validates :close, presence: true

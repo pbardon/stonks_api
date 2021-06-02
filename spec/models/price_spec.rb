@@ -6,12 +6,6 @@ RSpec.describe Price, type: :model do
       expect(create(:price)).to be_valid
     end
 
-    it "is not valid without a ticker" do
-      price = build(:price)
-      expect(price.update(ticker: nil)).to be false
-      expect(price).to_not be_valid
-    end
-
     it "is not valid without a open" do
       price = build(:price)
       expect(price.update(open: nil)).to be false

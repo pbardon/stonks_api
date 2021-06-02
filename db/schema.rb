@@ -10,17 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_02_053554) do
+ActiveRecord::Schema.define(version: 2021_06_02_063103) do
 
-  create_table "companies", force: :cascade do |t|
-    t.string "ticker"
+  create_table "companies", primary_key: "ticker", id: :string, force: :cascade do |t|
     t.float "marketcap"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "prices", force: :cascade do |t|
-    t.string "ticker"
     t.float "open"
     t.float "close"
     t.float "high"
@@ -30,6 +28,8 @@ ActiveRecord::Schema.define(version: 2021_06_02_053554) do
     t.string "querytype"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "company_ticker"
+    t.index ["company_ticker"], name: "index_prices_on_company_ticker"
   end
 
   create_table "searches", force: :cascade do |t|

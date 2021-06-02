@@ -32,9 +32,19 @@ RSpec.describe "/companies", type: :request do
     {}
   }
 
+  before(:each) do
+    
+  end
+
+  after(:each) do
+    if @company
+      @company.destroy!
+    end
+  end
+
   describe "GET /index" do
     it "renders a successful response" do
-      Company.create! valid_attributes
+      @company = Company.create! valid_attributes
       get companies_url, headers: valid_headers, as: :json
       expect(response).to be_successful
     end
@@ -42,8 +52,8 @@ RSpec.describe "/companies", type: :request do
 
   describe "GET /show" do
     it "renders a successful response" do
-      company = Company.create! valid_attributes
-      get company_url(company), as: :json
+      @company = Company.create! valid_attributes
+      get company_url(@company), as: :json
       expect(response).to be_successful
     end
   end
@@ -85,22 +95,22 @@ RSpec.describe "/companies", type: :request do
   describe "PATCH /update" do
     context "with valid parameters" do
       let(:new_attributes) {
-        { ticker: Faker::Finance.ticker }
+        { marketcap: Faker::Number.number(digits: 5)}
       }
 
       it "updates the requested company" do
-        company = Company.create! valid_attributes
-        old_ticker = company.ticker
-        patch company_url(company),
+        @company = Company.create! valid_attributes
+        old_mc = @company.marketcap
+        patch company_url(@company),
               params: { company: new_attributes }, headers: valid_headers, as: :json
-        company.reload
-        expect(company).to be_valid
-        expect(company.ticker).to_not eq(old_ticker)
+        @company.reload
+        expect(@company).to be_valid
+        expect(@company.marketcap).to_not eq(old_mc)
       end
 
       it "renders a JSON response with the company" do
-        company = Company.create! valid_attributes
-        patch company_url(company),
+        @company = Company.create! valid_attributes
+        patch company_url(@company),
               params: { company: new_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -109,8 +119,8 @@ RSpec.describe "/companies", type: :request do
 
     context "with invalid parameters" do
       it "renders a JSON response with errors for the company" do
-        company = Company.create! valid_attributes
-        patch company_url(company),
+        @company = Company.create! valid_attributes
+        patch company_url(@company),
               params: { company: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -120,9 +130,9 @@ RSpec.describe "/companies", type: :request do
 
   describe "DELETE /destroy" do
     it "destroys the requested company" do
-      company = Company.create! valid_attributes
+      @company = Company.create! valid_attributes
       expect {
-        delete company_url(company), headers: valid_headers, as: :json
+        delete company_url(@company), headers: valid_headers, as: :json
       }.to change(Company, :count).by(-1)
     end
   end

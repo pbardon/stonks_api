@@ -7,7 +7,7 @@ RSpec.describe CompaniesController, type: :routing do
     end
 
     it "routes to #show" do
-      expect(get: "/companies/1").to route_to("companies#show", id: "1")
+      expect(get: "/companies/AAPL").to route_to("companies#show", ticker: "AAPL")
     end
 
 
@@ -16,15 +16,15 @@ RSpec.describe CompaniesController, type: :routing do
     end
 
     it "routes to #update via PUT" do
-      expect(put: "/companies/1").to route_to("companies#update", id: "1")
+      expect(put: "/companies/AAPL").to route_to("companies#update", ticker: "AAPL")
     end
 
     it "routes to #update via PATCH" do
-      expect(patch: "/companies/1").to route_to("companies#update", id: "1")
+      expect(patch: "/companies/AAPL").to route_to("companies#update", ticker: "AAPL")
     end
 
     it "routes to #destroy" do
-      expect(delete: "/companies/1").to route_to("companies#destroy", id: "1")
+      expect(delete: "/companies/AAPL").to route_to("companies#destroy", ticker: "AAPL")
     end
   end
 end
