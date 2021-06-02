@@ -33,11 +33,14 @@ RSpec.describe "/prices", type: :request do
   }
 
   before(:each) do
+    puts "Company.length #{Company.all.length}"
     @company = create(:company)
   end
 
   after(:each) do
-    @company.destroy!
+    if @company
+      @company.destroy!
+    end
   end
 
   describe "GET  /company/**TICKER**/prices" do

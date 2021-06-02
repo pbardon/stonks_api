@@ -33,7 +33,7 @@ RSpec.describe "/companies", type: :request do
   }
 
   before(:each) do
-    
+    @company = create(:company)
   end
 
   after(:each) do
@@ -44,7 +44,6 @@ RSpec.describe "/companies", type: :request do
 
   describe "GET /index" do
     it "renders a successful response" do
-      @company = Company.create! valid_attributes
       get companies_url, headers: valid_headers, as: :json
       expect(response).to be_successful
     end
@@ -52,7 +51,6 @@ RSpec.describe "/companies", type: :request do
 
   describe "GET /show" do
     it "renders a successful response" do
-      @company = Company.create! valid_attributes
       get company_url(@company), as: :json
       expect(response).to be_successful
     end
@@ -65,6 +63,8 @@ RSpec.describe "/companies", type: :request do
           post companies_url,
                params: { company: valid_attributes }, headers: valid_headers, as: :json
         }.to change(Company, :count).by(1)
+
+        @company = Company.find_by_ticker(@company.ticker)
       end
 
       it "renders a JSON response with the new company" do
@@ -72,6 +72,7 @@ RSpec.describe "/companies", type: :request do
              params: { company: valid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
+        @company = Company.find_by_ticker(@company.ticker)
       end
     end
 
@@ -88,6 +89,7 @@ RSpec.describe "/companies", type: :request do
              params: { company: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
+        @company = Company.find_by_ticker(@company.ticker)
       end
     end
   end
@@ -99,38 +101,37 @@ RSpec.describe "/companies", type: :request do
       }
 
       it "updates the requested company" do
-        @company = Company.create! valid_attributes
         old_mc = @company.marketcap
         patch company_url(@company),
               params: { company: new_attributes }, headers: valid_headers, as: :json
         @company.reload
         expect(@company).to be_valid
         expect(@company.marketcap).to_not eq(old_mc)
+        @company = Company.find_by_ticker(@company.ticker)
       end
 
       it "renders a JSON response with the company" do
-        @company = Company.create! valid_attributes
         patch company_url(@company),
               params: { company: new_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
+        @company = Company.find_by_ticker(@company.ticker)
       end
     end
 
     context "with invalid parameters" do
       it "renders a JSON response with errors for the company" do
-        @company = Company.create! valid_attributes
         patch company_url(@company),
               params: { company: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
+        @company = Company.find_by_ticker(@company.ticker)
       end
     end
   end
 
   describe "DELETE /destroy" do
     it "destroys the requested company" do
-      @company = Company.create! valid_attributes
       expect {
         delete company_url(@company), headers: valid_headers, as: :json
       }.to change(Company, :count).by(-1)

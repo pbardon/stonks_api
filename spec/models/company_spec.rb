@@ -6,7 +6,9 @@ RSpec.describe Company, type: :model do
   end
 
   after(:each) do
-    @company.destroy
+    if @company
+      @company.destroy!
+    end
   end
 
   describe "company field validation" do
@@ -27,18 +29,18 @@ RSpec.describe Company, type: :model do
     end    
   end
 
-  describe "company has many prices" do
-    it "can create a company with a list of prices" do
-      @company = company_with_prices
-      expect(@company.prices.length).to eq(5)
-    end
+  # describe "company has many prices" do
+  #   it "can create a company with a list of prices" do
+  #     @company = company_with_prices
+  #     expect(@company.prices.length).to eq(5)
+  #   end
 
-    it "can create a new price and add it to the prices collection" do
-      @company = company_with_prices
-      # company = create(:company)
-      # expect(company.prices.length).to eq(0)
-      # company.prices.create(build(:price).attributes)
-      # expect(company.prices.length).to eq(1)
-    end
-  end
+  #   it "can create a new price and add it to the prices collection" do
+  #     @company = company_with_prices
+  #     # company = create(:company)
+  #     # expect(company.prices.length).to eq(0)
+  #     # company.prices.create(build(:price).attributes)
+  #     # expect(company.prices.length).to eq(1)
+  #   end
+  # end
 end
