@@ -10,7 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_02_033030) do
+ActiveRecord::Schema.define(version: 2021_06_02_053554) do
+
+  create_table "companies", force: :cascade do |t|
+    t.string "ticker"
+    t.float "marketcap"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
 
   create_table "prices", force: :cascade do |t|
     t.string "ticker"
