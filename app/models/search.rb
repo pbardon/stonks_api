@@ -1,43 +1,33 @@
 class Search < ApplicationRecord
     validates :ticker, presence: true
-    validates :timestamp, presence: true
-    validates :querytype, presence: true
-
     validates :ticker, length: {maximum: 5}
-    validates :querytype, inclusion: { in: %w(24h 60m) }
 
-
-    def create
+    def query_external_api
         ## Execute search, fetch results from API, and return the search object
-        # search result should contain link to price object
-        self
-    end
+        # Search result should contain link to the company object
 
-    def index
-        ## Perform any sorting or filtering of the searches, 
-        # we should be able to sort the searches by timestamp or ticker
-        # We should be able to filter on the same fields 
-        self
-    end
-
-    def query_daily
-        # First we check if the specific combination is found in the price database
-        if price_exists?
-            return nil
+        # Check if we have results for the ticker first, if so return them
+        unless does_search_exist?
+        # Otherwise fetch the prices from the API
+            results = fetch_results()
         end
-        # If we are looking for a specific daily price we fetch the week's daily 
-        # 24hr interval data. Then we store those values to the database 
-        # and return the specific daily price we are querying.
+        # Process the results and save them to active record
+
+        # Return whether we performed a search
+        return !!results
     end
 
-    def query_hourly
-        # First we check if the specific combination is found in the price database
-        if price_exists?
-            return nil
-        end
-        # If we are looking for a specific hourly price we fetch the days hourly 
-        # 60m interval data. Then we store those values to the database 
-        # and return the specific hourly price we are querying.
+    def fetch_results
+        fmp_api = Apis::FinancialModelingPrepApi.new(self.ticker)
+        fmp_api.find()
+    end
 
+    def does_search_exist?()
+        return !!Search.find_by_ticker(self.ticker)
+    end
+
+
+    def create_from_results(results)
+        
     end
 end

@@ -2,29 +2,37 @@ require "rails_helper"
 
 RSpec.describe PricesController, type: :routing do
   describe "routing" do
+    before(:all) do
+      @company = create(:company)  
+    end
+
+    after(:all) do
+      @company.destroy!
+    end
+
     it "routes to #index" do
-      expect(get: "/prices").to route_to("prices#index")
+      expect(get: "/companies/#{@company.id}/prices").to route_to("prices#index", company_id: @company.id.to_s)
     end
 
     it "routes to #show" do
-      expect(get: "/prices/1").to route_to("prices#show", id: "1")
+      expect(get: "/companies/#{@company.id}/prices/1").to route_to("prices#show", company_id: @company.id.to_s, id: "1")
     end
 
 
     it "routes to #create" do
-      expect(post: "/prices").to route_to("prices#create")
+      expect(post: "/companies/#{@company.id}/prices").to route_to("prices#create", company_id: @company.id.to_s)
     end
 
     it "routes to #update via PUT" do
-      expect(put: "/prices/1").to route_to("prices#update", id: "1")
+      expect(put: "/companies/#{@company.id}/prices/1").to route_to("prices#update", id: "1", company_id: @company.id.to_s)
     end
 
     it "routes to #update via PATCH" do
-      expect(patch: "/prices/1").to route_to("prices#update", id: "1")
+      expect(patch: "/companies/#{@company.id}/prices/1").to route_to("prices#update", id: "1", company_id: @company.id.to_s)
     end
 
     it "routes to #destroy" do
-      expect(delete: "/prices/1").to route_to("prices#destroy", id: "1")
+      expect(delete: "/companies/#{@company.id}/prices/1").to route_to("prices#destroy", id: "1", company_id: @company.id.to_s)
     end
   end
 end

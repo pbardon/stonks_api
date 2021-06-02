@@ -32,18 +32,28 @@ RSpec.describe "/prices", type: :request do
     {}
   }
 
+  before(:each) do
+    @company = create(:company)
+  end
+
+  after(:each) do
+    if @company
+      @company.destroy!
+    end
+  end
+
   describe "GET /index" do
     it "renders a successful response" do
-      Price.create! valid_attributes
-      get prices_url, headers: valid_headers, as: :json
+      @company.prices.create! valid_attributes
+      get company_prices_url(@company.id), headers: valid_headers, as: :json
       expect(response).to be_successful
     end
   end
 
   describe "GET /show" do
     it "renders a successful response" do
-      price = Price.create! valid_attributes
-      get price_url(price), as: :json
+      @company.prices.create! valid_attributes
+      get company_prices_url(@company.id), as: :json
       expect(response).to be_successful
     end
   end
@@ -52,13 +62,13 @@ RSpec.describe "/prices", type: :request do
     context "with valid parameters" do
       it "creates a new Price" do
         expect {
-          post prices_url,
+          post company_prices_url(@company.id),
                params: { price: valid_attributes }, headers: valid_headers, as: :json
-        }.to change(Price, :count).by(1)
+        }.to change(@company.prices, :count).by(1)
       end
 
       it "renders a JSON response with the new price" do
-        post prices_url,
+        post company_prices_url(@company.id),
              params: { price: valid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -68,13 +78,13 @@ RSpec.describe "/prices", type: :request do
     context "with invalid parameters" do
       it "does not create a new Price" do
         expect {
-          post prices_url,
+          post company_prices_url(@company.id),
                params: { price: invalid_attributes }, as: :json
-        }.to change(Price, :count).by(0)
+        }.to change(@company.prices, :count).by(0)
       end
 
       it "renders a JSON response with errors for the new price" do
-        post prices_url,
+        post company_prices_url(@company.id),
              params: { price: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -89,17 +99,17 @@ RSpec.describe "/prices", type: :request do
       }
 
       it "updates the requested price" do
-        price = Price.create! valid_attributes
+        price = @company.prices.create! valid_attributes
         old_ticker = price.ticker
-        patch price_url(price),
+        patch company_price_url(@company.id, price),
               params: { price: new_attributes }, headers: valid_headers, as: :json
         price.reload
         expect(price.ticker).to_not eq(old_ticker)
       end
 
       it "renders a JSON response with the price" do
-        price = Price.create! valid_attributes
-        patch price_url(price),
+        price = @company.prices.create! valid_attributes
+        patch company_price_url(@company.id, price),
               params: { price: new_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -108,8 +118,8 @@ RSpec.describe "/prices", type: :request do
 
     context "with invalid parameters" do
       it "renders a JSON response with errors for the price" do
-        price = Price.create! valid_attributes
-        patch price_url(price),
+        price = @company.prices.create! valid_attributes
+        patch company_price_url(@company.id, price),
               params: { price: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -119,10 +129,10 @@ RSpec.describe "/prices", type: :request do
 
   describe "DELETE /destroy" do
     it "destroys the requested price" do
-      price = Price.create! valid_attributes
+      price = @company.prices.create! valid_attributes
       expect {
-        delete price_url(price), headers: valid_headers, as: :json
-      }.to change(Price, :count).by(-1)
+        delete company_price_url(@company.id, price), headers: valid_headers, as: :json
+      }.to change(@company.prices, :count).by(-1)
     end
   end
 end
