@@ -10,5 +10,7 @@ FactoryBot.define do
         high { Faker::Number.decimal(l_digits: 2) }
         low { Faker::Number.decimal(l_digits: 2) }
         volume { Faker::Number.number(digits: 5)}
+
+        company
     end
 end

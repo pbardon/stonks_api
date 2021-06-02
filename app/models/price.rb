@@ -10,4 +10,6 @@ class Price < ApplicationRecord
     validates :timestamp, presence: true
     validates :querytype, presence: true
     validates :querytype, inclusion: { in: %w(24h 60m) }
+
+    belongs_to :company
 end
