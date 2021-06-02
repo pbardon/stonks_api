@@ -15,17 +15,17 @@ class Search < ApplicationRecord
         end
         # Process the results and save them to active record
 
-        # Return the search result
-        self
+        # Return whether we performed a search
+        return !!results
     end
 
     def fetch_results
-        fmp_api = FinancialModelingPrepAPI.new()
-        fmp_api
+        fmp_api = Apis::FinancialModelingPrepApi.new(self.ticker)
+        fmp_api.find()
     end
 
-    def does_search_exist?
-        return Search.find(params[:ticker])
+    def does_search_exist?()
+        return !!Search.find_by_ticker(self.ticker)
     end
 
 

@@ -13,4 +13,12 @@ RSpec.describe Search, type: :model do
         expect(search).to_not be_valid
     end
   end
+
+  describe "it can query the api for historical price data for a specific company" do
+      it "can query the api and get a result" do
+          search = build(:search)
+          result = search.query_external_api()
+          expect(result).to be true
+      end
+  end
 end

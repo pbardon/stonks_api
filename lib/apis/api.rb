@@ -1,11 +1,13 @@
-class API
-    include HTTParty
+module Apis
+    class Api
+        include HTTParty
 
-    def initialize(url)
-        @url = url
-    end
+        def initialize(url)
+            @url = url
+        end
 
-    def find()
-        response = self.class.get(@url)
+        def query()
+            response = self.class.get(@url)
+        end
     end
 end
