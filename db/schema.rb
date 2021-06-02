@@ -10,7 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_01_215041) do
+ActiveRecord::Schema.define(version: 2021_06_02_033030) do
+
+  create_table "prices", force: :cascade do |t|
+    t.string "ticker"
+    t.float "open"
+    t.float "close"
+    t.float "high"
+    t.float "low"
+    t.integer "volume"
+    t.datetime "timestamp"
+    t.string "quotetype"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
 
   create_table "searches", force: :cascade do |t|
     t.string "ticker"
