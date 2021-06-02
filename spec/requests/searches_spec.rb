@@ -21,7 +21,7 @@ RSpec.describe "/searches", type: :request do
   }
 
   let(:invalid_attributes) {
-    { ticker: "AAPL", querytype: '5m'}
+    { ticker: "AAPLFFF"}
   }
 
   # This should return the minimal set of values that should be in the headers

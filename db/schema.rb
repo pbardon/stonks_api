@@ -34,8 +34,6 @@ ActiveRecord::Schema.define(version: 2021_06_02_053554) do
 
   create_table "searches", force: :cascade do |t|
     t.string "ticker"
-    t.string "querytype"
-    t.datetime "timestamp"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
