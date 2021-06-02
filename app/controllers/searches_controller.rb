@@ -16,7 +16,6 @@ class SearchesController < ApplicationController
   # POST /searches
   def create
     @search = Search.new(search_params)
-
     if @search.save
       render json: @search, status: :created, location: @search
     else
@@ -46,6 +45,6 @@ class SearchesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def search_params
-      params.require(:search).permit(:ticker, :type, :timestamp)
+      params.require(:search).permit(:ticker, :querytype, :timestamp)
     end
 end

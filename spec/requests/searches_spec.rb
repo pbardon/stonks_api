@@ -17,11 +17,11 @@ RSpec.describe "/searches", type: :request do
   # Search. As you add validations to Search, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    FactoryBot.build(:search).attributes.symbolize_keys
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    { ticker: "AAPL", querytype: '5m'}
   }
 
   # This should return the minimal set of values that should be in the headers
@@ -83,15 +83,18 @@ RSpec.describe "/searches", type: :request do
         post searches_url,
              params: { search: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
   end
 
   describe "PATCH /update" do
+    new_stock_ticker = "AAPL"
     context "with valid parameters" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        new_attributes = valid_attributes
+        new_attributes = new_attributes.update(ticker: new_stock_ticker)
+        new_attributes
       }
 
       it "updates the requested search" do
@@ -99,7 +102,7 @@ RSpec.describe "/searches", type: :request do
         patch search_url(search),
               params: { search: new_attributes }, headers: valid_headers, as: :json
         search.reload
-        skip("Add assertions for updated state")
+        expect(search.ticker).to eq(new_stock_ticker)
       end
 
       it "renders a JSON response with the search" do
@@ -117,7 +120,7 @@ RSpec.describe "/searches", type: :request do
         patch search_url(search),
               params: { search: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq("application/json")
+        expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
   end
