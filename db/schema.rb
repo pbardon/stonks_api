@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_02_053554) do
+ActiveRecord::Schema.define(version: 2021_06_02_184014) do
 
   create_table "companies", force: :cascade do |t|
     t.string "ticker"
@@ -30,6 +30,8 @@ ActiveRecord::Schema.define(version: 2021_06_02_053554) do
     t.string "querytype"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "company_id"
+    t.index ["company_id"], name: "index_prices_on_company_id"
   end
 
   create_table "searches", force: :cascade do |t|

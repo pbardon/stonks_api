@@ -1,4 +1,5 @@
 class PricesController < ApplicationController
+  before_action :get_company
   before_action :set_price, only: %i[ show update destroy ]
 
   # GET /prices
@@ -15,7 +16,7 @@ class PricesController < ApplicationController
   # POST /prices
   # POST /prices.json
   def create
-    @price = Price.new(price_params)
+    @price = @company.prices.new(price_params)
 
     if @price.save
       render :show, status: :created, location: @price
@@ -40,7 +41,15 @@ class PricesController < ApplicationController
     @price.destroy
   end
 
+  def price_url(price)
+    company_price_url(@company.id, price)
+  end
+
   private
+    def get_company
+      @company = Company.find(params[:company_id])
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_price
       @price = Price.find(params[:id])

@@ -21,7 +21,7 @@ RSpec.describe "/searches", type: :request do
   }
 
   let(:invalid_attributes) {
-    { ticker: "AAPLFFF"}
+    { ticker: "AAPFDSASDFGL" }
   }
 
   # This should return the minimal set of values that should be in the headers
@@ -86,6 +86,18 @@ RSpec.describe "/searches", type: :request do
         expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
+
+    # context "does not allow duplicate searches" do
+    #   it "prevents the user from creating a duplicate search" do
+    #     post searches_url,
+    #       params: { search: valid_attributes.update(ticker: 'DDD')}, headers: valid_headers, as: :json
+    #     expect(response).to have_http_status(:created)
+
+    #     post searches_url,
+    #       params: { search: valid_attributes.update(ticker: 'DDD')}, headers: valid_headers, as: :json
+    #     expect(response).to have_http_status(:unprocessable_entity)
+    #   end
+    # end
   end
 
   describe "PATCH /update" do

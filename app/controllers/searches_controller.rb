@@ -16,7 +16,7 @@ class SearchesController < ApplicationController
   # POST /searches
   def create
     @search = Search.new(search_params)
-    if @search.save
+    if @search.query_external_api && @search.save
       render json: @search, status: :created, location: @search
     else
       render json: @search.errors, status: :unprocessable_entity
