@@ -1,16 +1,14 @@
+# frozen_string_literal: true
+
+# Prices Controller used to provide persisited price data
 class PricesController < ApplicationController
-  before_action :get_company
-  before_action :set_price, only: %i[ show update destroy ]
+  before_action :fetch_company
+  before_action :set_price, only: %i[show update destroy]
 
   # GET /prices
   # GET /prices.json
   def index
     @prices = Price.all
-  end
-
-  # GET /prices/1
-  # GET /prices/1.json
-  def show
   end
 
   # POST /prices
@@ -46,17 +44,18 @@ class PricesController < ApplicationController
   end
 
   private
-    def get_company
-      @company = Company.find(params[:company_id])
-    end
 
-    # Use callbacks to share common setup or constraints between actions.
-    def set_price
-      @price = Price.find(params[:id])
-    end
+  def fetch_company
+    @company = Company.find(params[:company_id])
+  end
 
-    # Only allow a list of trusted parameters through.
-    def price_params
-      params.require(:price).permit(:ticker, :open, :close, :high, :low, :volume, :timestamp, :querytype)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_price
+    @price = Price.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def price_params
+    params.require(:price).permit(:ticker, :open, :close, :high, :low, :volume, :timestamp, :querytype)
+  end
 end

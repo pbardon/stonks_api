@@ -1,4 +1,5 @@
+# frozen_string_literal: true
+
+# Application controller used to define methods and setting applicable to all controllers.
 class ApplicationController < ActionController::API
-    # enable JBuilder in the rendering process
-    include ActionController::ImplicitRender
 end
