@@ -6,12 +6,6 @@ RSpec.describe Price, type: :model do
       expect(create(:price)).to be_valid
     end
 
-    it "is not valid without a ticker" do
-      price = build(:price)
-      expect(price.update(ticker: nil)).to be false
-      expect(price).to_not be_valid
-    end
-
     it "is not valid without a open" do
       price = build(:price)
       expect(price.update(open: nil)).to be false
@@ -39,18 +33,6 @@ RSpec.describe Price, type: :model do
     it "is not valid without a volume" do
       price = build(:price)
       expect(price.update(volume: nil)).to be false
-      expect(price).to_not be_valid    
-    end
-
-    it "is not valid without a timestamp" do
-      price = build(:price)
-      expect(price.update(timestamp: nil)).to be false
-      expect(price).to_not be_valid    
-    end
-     
-    it "is not valid without a querytype" do
-      price = build(:price)
-      expect(price.update(querytype: nil)).to be false
       expect(price).to_not be_valid    
     end
   end

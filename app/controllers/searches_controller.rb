@@ -10,14 +10,35 @@ class SearchesController < ApplicationController
 
   # GET /searches/1
   def show
-    render json: @search
+    @search = Search.find(params[:id])
   end
 
   # POST /searches
   def create
     @search = Search.new(search_params)
-    if @search.query_external_api && @search.save
-      render json: @search, status: :created, location: @search
+    # Validate the object first
+    unless @search.valid?
+      render json: @search.errors, status: :bad_request
+      return
+    end
+
+    if @search.exists?
+      render json: "Search for this ticker on this date has already been performed", status: :conflict
+      return
+    end
+
+    results = @search.query_external_api
+
+    # Ensure we got results from the API
+    unless results
+      render json: 'Unable to retrieve query results', status: :internal_server_error
+      return
+    end
+
+    # Associate the search with the company
+    @search.company = Company.find_by_ticker(@search.ticker)
+    if @search.save
+      render status: :created
     else
       render json: @search.errors, status: :unprocessable_entity
     end
@@ -45,6 +66,6 @@ class SearchesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def search_params
-      params.require(:search).permit(:ticker, :querytype, :timestamp)
+      params.require(:search).permit(:ticker, :date)
     end
 end

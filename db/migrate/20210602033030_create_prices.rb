@@ -7,9 +7,7 @@ class CreatePrices < ActiveRecord::Migration[6.1]
       t.float :high
       t.float :low
       t.integer :volume
-      t.datetime :timestamp
-      t.string :querytype
-
+      t.datetime :date
       t.timestamps
     end
   end

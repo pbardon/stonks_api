@@ -11,12 +11,6 @@ RSpec.describe Company, type: :model do
       expect(company.update(ticker: nil)).to be false
       expect(company).to_not be_valid
     end
-
-    it "is not valid without a marketcap" do
-      company = build(:company)
-      expect(company.update(marketcap: nil)).to be false
-      expect(company).to_not be_valid    
-    end    
   end
 
   describe "has many prices" do
@@ -27,9 +21,21 @@ RSpec.describe Company, type: :model do
 
     it "can create a new price in the prices collection" do
       company = create(:company)
-      prices_length = company.prices.length
       expect { company.prices.create(build(:price).attributes) }
         .to change(company.prices, :count).by(1)
+    end
+  end
+
+  describe "has many searches" do
+    it "can create a company with many searches" do
+      company = company_with_searches
+      expect(company.searches.length).to eq(4)
+    end
+
+    it "can create a new search in the searches collection" do
+      company = create(:company)
+      expect { company.searches.create(build(:search).attributes) }
+        .to change(company.searches, :count).by(1)
     end
   end
 end

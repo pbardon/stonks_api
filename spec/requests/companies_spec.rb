@@ -21,7 +21,7 @@ RSpec.describe "/companies", type: :request do
   }
 
   let(:invalid_attributes) {
-    { marketcap: nil }
+    { ticker: "AAPLSDFSF" }
   }
 
   # This should return the minimal set of values that should be in the headers

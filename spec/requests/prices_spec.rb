@@ -21,7 +21,7 @@ RSpec.describe "/prices", type: :request do
   }
 
   let(:invalid_attributes) {
-    { ticker: "AAPL", querytype: '5m'}
+    { open: nil }
   }
 
   # This should return the minimal set of values that should be in the headers
