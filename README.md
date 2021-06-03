@@ -21,3 +21,16 @@ Things you may want to cover:
 
 * Deployment instructions
 
+
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"search": {"ticker": "BRK.B" }}' \
+  http://localhost:3000/searches
+
+
+
+curl --header "Content-Type: application/json" \
+  --request GET \
+  http://localhost:3000/searches/1
+
+

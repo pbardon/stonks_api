@@ -36,9 +36,12 @@ class Search < ApplicationRecord
     def refresh_prices(company, results)
         # Create the prices for each historical price in the data set
         company.prices.clear
-        results['historical'].each do |price_data|
-            price = Apis::FinancialModelingPrepApi.parse_price(price_data)
-            company.prices.create!(price)
+        # Performance bottleneck, open a single transaction for all the prices
+        ActiveRecord::Base.transaction do
+            results['historical'].each do |price_data|
+                price = Apis::FinancialModelingPrepApi.parse_price(price_data)
+                company.prices.create!(price)
+            end
         end
     end
 
