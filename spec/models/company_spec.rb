@@ -11,12 +11,6 @@ RSpec.describe Company, type: :model do
       expect(company.update(ticker: nil)).to be false
       expect(company).to_not be_valid
     end
-
-    it "is not valid without a marketcap" do
-      company = build(:company)
-      expect(company.update(marketcap: nil)).to be false
-      expect(company).to_not be_valid    
-    end    
   end
 
   describe "has many prices" do

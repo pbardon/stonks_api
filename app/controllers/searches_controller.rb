@@ -16,7 +16,25 @@ class SearchesController < ApplicationController
   # POST /searches
   def create
     @search = Search.new(search_params)
-    if @search.query_external_api && @search.save
+    # Validate the object first
+    unless @search.valid?
+      render json: @search.errors, status: :bad_request
+      return
+    end
+
+    if @search.exists?
+      render json: "Search for this ticker on this date has already been performed", status: :conflict
+      return
+    end
+
+    results = @search.query_external_api
+
+    unless results
+      render json: 'Unable to retrieve query results', status: :internal_server_error
+      return
+    end
+
+    if @search.save
       render json: @search, status: :created, location: @search
     else
       render json: @search.errors, status: :unprocessable_entity
@@ -45,6 +63,6 @@ class SearchesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def search_params
-      params.require(:search).permit(:ticker, :querytype, :timestamp)
+      params.require(:search).permit(:ticker, :date)
     end
 end

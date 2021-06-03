@@ -17,9 +17,8 @@ RSpec.describe Search, type: :model do
   describe "it can query the api for historical price data for a specific company" do
       it "can query the api and get a result" do
           search = build(:search)
-          result = search.query_external_api()
-          expect(result).to be true
+          result = search.query_external_api
+          expect(result.class).to eq(Company)
       end
-
   end
 end

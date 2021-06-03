@@ -82,22 +82,22 @@ RSpec.describe "/searches", type: :request do
       it "renders a JSON response with errors for the new search" do
         post searches_url,
              params: { search: invalid_attributes }, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:bad_request)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
     end
 
-    # context "does not allow duplicate searches" do
-    #   it "prevents the user from creating a duplicate search" do
-    #     post searches_url,
-    #       params: { search: valid_attributes.update(ticker: 'DDD')}, headers: valid_headers, as: :json
-    #     expect(response).to have_http_status(:created)
+    context "does not allow duplicate searches" do
+      it "prevents the user from creating a duplicate search" do
+        post searches_url,
+          params: { search: valid_attributes.update(ticker: 'DDD')}, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:created)
 
-    #     post searches_url,
-    #       params: { search: valid_attributes.update(ticker: 'DDD')}, headers: valid_headers, as: :json
-    #     expect(response).to have_http_status(:unprocessable_entity)
-    #   end
-    # end
+        post searches_url,
+          params: { search: valid_attributes.update(ticker: 'DDD')}, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:conflict)
+      end
+    end
   end
 
   describe "PATCH /update" do
