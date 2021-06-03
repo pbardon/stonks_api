@@ -43,6 +43,9 @@ RSpec.describe "/searches", type: :request do
       5.times do
         create(:search)
       end
+      get searches_url, headers: valid_headers, as: :json
+      expect(response).to be_successful
+      expect(JSON.parse(response.body).length).to eq(5)
     end
   end
 
@@ -51,6 +54,20 @@ RSpec.describe "/searches", type: :request do
       search = Search.create! valid_attributes
       get search_url(search), as: :json
       expect(response).to be_successful
+    end
+
+    it "renders price and company information" do
+      search = create(:search)
+      company = company_with_prices
+      search.company = company
+      search.save!
+      get search_url(search), as: :json
+      expect(response).to be_successful
+      parsed = JSON.parse(response.body)
+      expect(parsed['ticker']).to_not be_nil
+      expect(parsed['company']).to_not be_nil
+      expect(parsed['company']['prices']).to_not be_nil
+      expect(parsed['company']['prices'][0]['open']).to_not be_nil
     end
   end
 
@@ -96,6 +113,19 @@ RSpec.describe "/searches", type: :request do
         post searches_url,
           params: { search: valid_attributes.update(ticker: 'DDD')}, headers: valid_headers, as: :json
         expect(response).to have_http_status(:conflict)
+      end
+    end
+
+    context "returns the company that we were searching for" do
+      it "returns the company information in the search result JSON body" do
+        attributes = valid_attributes
+        post searches_url,
+          params: { search: attributes}, headers: valid_headers, as: :json
+        expect(response).to have_http_status(:created)
+        body = JSON.parse(response.body)
+        expect(body["ticker"]).to eq(attributes[:ticker])
+        expect(Company.find_by_ticker(body["ticker"]).ticker).to eq(attributes[:ticker])
+        expect(body["company"]["prices"]).to_not be_nil
       end
     end
   end

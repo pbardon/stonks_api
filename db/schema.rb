@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_02_184014) do
+ActiveRecord::Schema.define(version: 2021_06_03_011428) do
 
   create_table "companies", force: :cascade do |t|
     t.string "ticker"
-    t.float "marketcap"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["ticker"], name: "index_companies_on_ticker"
   end
 
   create_table "prices", force: :cascade do |t|
@@ -26,8 +26,7 @@ ActiveRecord::Schema.define(version: 2021_06_02_184014) do
     t.float "high"
     t.float "low"
     t.integer "volume"
-    t.datetime "timestamp"
-    t.string "querytype"
+    t.datetime "date"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "company_id"
@@ -39,6 +38,10 @@ ActiveRecord::Schema.define(version: 2021_06_02_184014) do
     t.date "date"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "company_id"
+    t.index ["company_id"], name: "index_searches_on_company_id"
+    t.index ["date"], name: "index_searches_on_date"
+    t.index ["ticker"], name: "index_searches_on_ticker"
   end
 
 end

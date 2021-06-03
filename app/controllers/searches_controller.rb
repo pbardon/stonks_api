@@ -10,7 +10,7 @@ class SearchesController < ApplicationController
 
   # GET /searches/1
   def show
-    render json: @search
+    @search = Search.find(params[:id])
   end
 
   # POST /searches
@@ -29,13 +29,16 @@ class SearchesController < ApplicationController
 
     results = @search.query_external_api
 
+    # Ensure we got results from the API
     unless results
       render json: 'Unable to retrieve query results', status: :internal_server_error
       return
     end
 
+    # Associate the search with the company
+    @search.company = Company.find_by_ticker(@search.ticker)
     if @search.save
-      render json: @search, status: :created, location: @search
+      render status: :created
     else
       render json: @search.errors, status: :unprocessable_entity
     end

@@ -2,6 +2,8 @@ class Search < ApplicationRecord
     validates :ticker, presence: true
     validates :ticker, length: {maximum: 5}
 
+    belongs_to :company, optional: true
+
     def query_external_api
         ## Execute search, fetch results from API, and return the search object
         # Search result should contain link to the company object
