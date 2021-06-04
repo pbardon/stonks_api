@@ -7,7 +7,7 @@ class CreatePrices < ActiveRecord::Migration[6.1]
       t.float :high
       t.float :low
       t.integer :volume
-      t.datetime :date
+      t.datetime :date, index: true
       t.timestamps
     end
   end
