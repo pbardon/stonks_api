@@ -57,12 +57,11 @@ class Search < ApplicationRecord
   end
 
   def fetch_results
-    fmp_api = Apis::FinancialModelingPrepApi.new(ticker)
+    fmp_api = Apis::FinancialModelingPrepApi.new(ticker, ENV['api_key'])
     results = fmp_api.find
-    ticker = results['symbol']
     raise "External API did not return key 'symbol' data" unless ticker
     raise "External API did not return key 'historical' data" unless results['historical']
-    raise 'Search results don\'t match search query' unless ticker == self.ticker
+    raise 'Search results don\'t match search query' unless results['symbol'] == ticker
 
     results
   end
