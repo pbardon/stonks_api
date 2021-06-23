@@ -7,6 +7,8 @@ class Price < ApplicationRecord
   validates :high, presence: true
   validates :low, presence: true
   validates :volume, presence: true
+  validates :date, presence: true
 
   belongs_to :company
+
 end

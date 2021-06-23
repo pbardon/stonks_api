@@ -64,7 +64,8 @@ module Apis
         close: raw_price_data['close'],
         high: raw_price_data['high'],
         low: raw_price_data['low'],
-        volume: raw_price_data['volume']
+        volume: raw_price_data['volume'],
+        date: Date.parse(raw_price_data['date'])
       }
     end
   end

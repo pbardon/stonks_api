@@ -56,7 +56,7 @@ RSpec.describe Search, type: :model do
       s.date = Faker::Date.backward(days: 5)
       og_date = s.date
       s.ticker = "FOO"
-      results = Apis::FinancialModelingPrepApi.new(s.ticker).find
+      results = Apis::FinancialModelingPrepApi.new(s.ticker, 'foo').find
       s.create_or_refresh_company(results)
       expect(s.date).to_not be_nil
       expect(s.date).to_not eq(og_date)
@@ -68,7 +68,7 @@ RSpec.describe Search, type: :model do
       og_date = s.date
       c = create(:company)
       s.ticker = c.ticker
-      results = Apis::FinancialModelingPrepApi.new(c.ticker).find
+      results = Apis::FinancialModelingPrepApi.new(c.ticker, 'foo').find
       s.create_or_refresh_company(results)
       expect(s.date).to eq(og_date)
     end
@@ -76,12 +76,17 @@ RSpec.describe Search, type: :model do
 
   describe 'it can refresh prices for a company' do
     it 'creates price objects for each price retreived' do
-      skip 'todo: resolve sorting by date issue'
-      ## figure out how to sort by date
       s = build(:search)
       c = company_with_prices
       s.ticker = c.ticker
-      sorted = c.prices.sort_by(&:date)
+
+      old_results = JSON.parse(File.open(
+        "#{Rails.root}/spec/data/aapl_historical.json"
+      ).read)
+
+      s.refresh_prices(c, old_results)
+
+      sorted = c.prices.to_a.sort_by(&:date)
 
       latest_price = sorted.last
       expect(latest_price.date).to eq(Date.parse('2021-06-01'))
@@ -113,7 +118,6 @@ RSpec.describe Search, type: :model do
 
       expect(c.prices.length).to_not eq(0)
       expect(c.prices.first.class).to eq(Price)
-
     end
   end
 
@@ -139,10 +143,7 @@ RSpec.describe Search, type: :model do
       s2 = build(:search)
       s2.ticker = "DDD"
       s2.date = Date.today
-
       expect(s2.exists?).to be true
-
     end
   end
-
 end
