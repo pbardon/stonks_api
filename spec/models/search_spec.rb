@@ -2,29 +2,37 @@
 
 require 'rails_helper'
 
+def get_mock_price_data(filename)
+  return JSON.parse(File.open(
+    "#{Rails.root}/spec/data/#{filename}"
+  ).read)
+end
+
 RSpec.describe Search, type: :model do
-  describe 'search field validation' do
+  # Mock out the external API connector class
+  let(:api_connector) do
+    instance_double(Apis::FinancialModelingPrepApi)
+  end
+
+  describe '#validates' do
+    before(:each) { @search = build(:search) }
     it 'is valid with valid attributes' do
       expect(create(:search)).to be_valid
     end
 
     it 'is not valid without a ticker' do
-      search = build(:search)
       # update with invalid attribute returns false
-      expect(search.update(ticker: nil)).to be false
-      expect(search).to_not be_valid
+      expect(@search.update(ticker: nil)).to be false
+      expect(@search).to_not be_valid
+    end
+
+    it 'the length of the ticker' do
+      @search.update(ticker: 'HELLOWORLD')
+      expect(@search).to_not be_valid
     end
   end
 
-  describe 'it can query the api for historical price data for a specific company' do
-    it 'can query the api and get a result' do
-      search = build(:search)
-      result = search.query_external_api
-      expect(result.class).to eq(Company)
-    end
-  end
-
-  describe 'it belongs to a single company that we searched for' do
+  describe '#belongs_to company' do
     it 'can create a company associated with the search' do
       c = create(:company)
       c.searches.create(build(:search).attributes)
@@ -41,95 +49,7 @@ RSpec.describe Search, type: :model do
     end
   end
 
-  describe 'it can query the external api' do
-    it 'can retrieve the results from the api' do
-      # todo: mock fetch results
-      s = create(:search)
-      s.query_external_api
-      expect(s.date).to_not be_nil
-    end
-  end
-
-  describe 'it can create or refresh a company' do
-    it 'creates the company if it does not exist' do
-      s = build(:search)
-      s.date = Faker::Date.backward(days: 5)
-      og_date = s.date
-      s.ticker = "FOO"
-      results = Apis::FinancialModelingPrepApi.new(s.ticker).find
-      s.create_or_refresh_company(results)
-      expect(s.date).to_not be_nil
-      expect(s.date).to_not eq(og_date)
-    end
-
-    it 'refresh the company if it does exist' do
-      s = build(:search)
-      s.date = Faker::Date.backward(days: 5)
-      og_date = s.date
-      c = create(:company)
-      s.ticker = c.ticker
-      results = Apis::FinancialModelingPrepApi.new(c.ticker).find
-      s.create_or_refresh_company(results)
-      expect(s.date).to eq(og_date)
-    end
-  end
-
-  describe 'it can refresh prices for a company' do
-    it 'creates price objects for each price retreived' do
-      skip 'todo: resolve sorting by date issue'
-      ## figure out how to sort by date
-      s = build(:search)
-      c = company_with_prices
-      s.ticker = c.ticker
-      sorted = c.prices.sort_by(&:date)
-
-      latest_price = sorted.last
-      expect(latest_price.date).to eq(Date.parse('2021-06-01'))
-
-      new_results = JSON.parse(File.open(
-        "#{Rails.root}/spec/data/aapl_updated_historical.json"
-      ).read)
-
-      s.refresh_prices(c, new_results)
-      sorted = c.prices.sort_by(&:date)
-      new_latest_price = sorted.last
-
-      expect(new_latest_price).to_not eq(latest_price)
-      expect(new_latest_price.date).to eq(Date.parse('2021-06-02'))
-    end
-  end
-
-  describe 'it can process prices' do
-    it 'create the relevant price active record entries' do
-      c = create(:company)
-      s = build(:search)
-      expect(c.prices.length).to eq(0)
-      s.ticker = c.ticker
-      s.save
-      results = JSON.parse(File.open(
-        "#{Rails.root}/spec/data/aapl_updated_historical.json"
-      ).read)
-      s.process_prices(c, results)
-
-      expect(c.prices.length).to_not eq(0)
-      expect(c.prices.first.class).to eq(Price)
-
-    end
-  end
-
-  describe 'it can fetch results for a company' do
-    it 'validates that the data matches the expected format' do
-      search = build(:search)
-      search.fetch_results
-    end
-
-    it 'validates that the query is for the correct company' do
-      search = build(:search)
-      search.fetch_results
-    end
-  end
-
-  describe 'it checks if a search already exists? or not' do
+  describe '#exists?' do
     it 'validates uniqueness for a specific date and time' do
       s1 = build(:search)
       s1.ticker = "DDD"
@@ -139,10 +59,177 @@ RSpec.describe Search, type: :model do
       s2 = build(:search)
       s2.ticker = "DDD"
       s2.date = Date.today
-
       expect(s2.exists?).to be true
-
     end
   end
 
+  describe '#process_prices' do
+    it 'create the relevant price active record entries' do
+      c = create(:company)
+      s = build(:search)
+      expect(c.prices.length).to eq(0)
+      s.ticker = c.ticker
+      s.save
+      results = get_mock_price_data('aapl_updated_historical.json')
+      s.process_prices(c, results['historical'])
+
+      expect(c.prices.length).to_not eq(0)
+      expect(c.prices.first.class).to eq(Price)
+    end
+
+    it 'does not update the price if it already exists' do
+      s = build(:search)
+      c = create(:company)
+      mock_price_data = get_mock_price_data('aapl_historical.json')
+      price_list = mock_price_data['historical']
+      s.process_prices(c, price_list)
+      count = c.prices.count
+      price_list.append(price_list[0])
+      s.process_prices(c, price_list)
+      expect(c.prices.count).to eq(count)
+      price_list.append(JSON.parse('{
+        "date" : "2021-06-02",
+        "open" : 125.08,
+        "high" : 125.35,
+        "low" : 123.95,
+        "close" : 124.28,
+        "adjClose" : 124.28,
+        "volume" : 6.3890796E7,
+        "unadjustedVolume" : 6.3890796E7,
+        "change" : -0.8,
+        "changePercent" : -0.64,
+        "vwap" : 124.52667,
+        "label" : "June 01, 21",
+        "changeOverTime" : -0.0064
+      }'))
+      s.process_prices(c, price_list)
+      expect(c.prices.count).to eq(count + 1)
+    end
+  end
+
+  describe '#query_external_api' do
+    it 'can retrieve the results from the api' do
+      historical_prices = JSON.parse(File.open(
+        "#{Rails.root}/spec/data/aapl_historical.json"
+      ).read)
+
+      s = create(:search)
+      s.ticker = s.company.ticker
+      historical_prices['symbol'] = s.company.ticker
+
+      allow(Apis::FinancialModelingPrepApi)
+        .to receive(:new)
+        .and_return(api_connector)
+
+      allow(api_connector)
+        .to receive(:find)
+        .and_return(historical_prices)
+      search = s.query_external_api
+      expect(search.date).to_not be_nil
+      expect(search.company.last_query_date).to eq(Date.current)
+    end
+  end
+
+  describe '#refresh_prices' do
+    it 'only updates the price if the last query was older' do
+      s = build(:search)
+      c = build(:company)
+      c.last_query_date = 1.day.ago
+      s.company = c
+      s.save!
+      old_results = JSON.parse(File.open(
+        "#{Rails.root}/spec/data/aapl_historical.json"
+      ).read)
+
+      s.refresh_prices(c, old_results['historical'])
+      sorted = c.prices
+      latest_price = sorted.last
+      expect(latest_price.date).to eq(Date.parse('2021-06-01'))
+
+      new_results = JSON.parse(File.open(
+        "#{Rails.root}/spec/data/aapl_updated_historical.json"
+      ).read)
+
+      c.last_query_date = Date.current
+      c.save!
+      expect(s.refresh_prices(c, new_results['historical'])).to be(false)
+      new_latest_price = c.prices.last
+
+      expect(new_latest_price).to eq(latest_price)
+      expect(new_latest_price.date).to eq(Date.parse('2021-06-01'))
+    end
+
+    it 'adds any new prices to the prices collection' do
+      s = build(:search)
+      c = build(:company)
+      c.last_query_date = 2.days.ago
+      s.company = c
+      s.save!
+      old_results = JSON.parse(File.open(
+        "#{Rails.root}/spec/data/aapl_historical.json"
+      ).read)
+
+      s.refresh_prices(c, old_results['historical'])
+      sorted = c.prices
+      latest_price = sorted.last
+      expect(latest_price.date).to eq(Date.parse('2021-06-01'))
+
+      new_results = JSON.parse(File.open(
+        "#{Rails.root}/spec/data/aapl_updated_historical.json"
+      ).read)
+
+      c.last_query_date = 1.day.ago
+      c.save!
+      s.refresh_prices(c, new_results['historical'])
+      new_latest_price = c.prices.last
+
+      expect(new_latest_price).to_not eq(latest_price)
+      expect(new_latest_price.date).to eq(Date.parse('2021-06-02'))
+    end
+  end
+
+  describe '#update_company_prices' do
+    it 'creates the company if it does not exist' do
+      s = build(:search)
+      s.date = Faker::Date.backward(days: 5)
+      og_date = s.date
+      s.ticker = 'DDD'
+      results = Apis::FinancialModelingPrepApi.new(s.ticker, 'foo').find
+      s.update_company_prices(results['historical'])
+      expect(s.date).to_not be_nil
+      expect(s.date).to_not eq(og_date)
+    end
+
+    it 'refreshes the company if it does exist' do
+      s = build(:search)
+      s.date = Faker::Date.backward(days: 5)
+      og_date = s.date
+      c = create(:company)
+      s.ticker = c.ticker
+      results = Apis::FinancialModelingPrepApi.new(c.ticker, 'foo').find
+      s.update_company_prices(results['historical'])
+      expect(s.date).to eq(og_date)
+    end
+  end
+
+  describe '#validate_results' do
+    it 'validates that the data matches the expected format' do
+      search = build(:search)
+      mock_results = {}
+      expect { search.validate_results(mock_results) }.to raise_exception(
+        "External API did not return key 'symbol' data"
+      )
+    end
+
+    it 'validates that the query is for the correct company' do
+      search = build(:search)
+      search.ticker = 'NVDA'
+      mock_results = { 'historical' => [], 'symbol' => 'NVDA' }
+      search.validate_results(mock_results)
+      mock_invalid_results = { 'historical' => [], 'symbol' =>'AAPL' }
+      expect { search.validate_results(mock_invalid_results) }.to raise_exception(
+        "Search results don't match search query"
+      )
+    end
+  end
 end

@@ -19,8 +19,8 @@ module Apis
 
     def render_mock_api
       json_file = File.open("#{Rails.root}/spec/data/aapl_historical.json")
-       # turn the response into a JSON object
-      return JSON.parse(json_file.read)
+      # turn the response into a JSON object
+      JSON.parse(json_file.read)
     end
 
     def update_ticker(ticker)
@@ -44,11 +44,11 @@ module Apis
     def daily_request_limit_exceeded?
       @request_count > @allowed_daily_requests
     end
-  
+
     def increment_request_count
       @request_count += 1
     end
-  
+
     def reset_count
       @request_count = 0
     end
@@ -64,7 +64,8 @@ module Apis
         close: raw_price_data['close'],
         high: raw_price_data['high'],
         low: raw_price_data['low'],
-        volume: raw_price_data['volume']
+        volume: raw_price_data['volume'],
+        date: Date.parse(raw_price_data['date'])
       }
     end
   end
