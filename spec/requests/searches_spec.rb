@@ -26,6 +26,10 @@ RSpec.describe '/searches', type: :request do
     { ticker: 'AAPFDSASDFGL' }
   end
 
+  let(:api_connector) do
+    instance_double(Apis::FinancialModelingPrepApi)
+  end
+
   # This should return the minimal set of values that should be in the headers
   # in order to pass any filters (e.g. authentication) defined in
   # SearchesController, or in your router and rack
@@ -75,12 +79,33 @@ RSpec.describe '/searches', type: :request do
     context 'with valid parameters' do
       it 'creates a new Search' do
         expect do
+          historical_prices = JSON.parse(File.open(
+            "#{Rails.root}/spec/data/aapl_historical.json"
+          ).read)
+    
+          historical_prices['symbol'] = valid_attributes[:ticker]
+    
+          allow(Apis::FinancialModelingPrepApi)
+            .to receive(:new)
+            .and_return(api_connector)
+    
+          allow(api_connector)
+            .to receive(:find)
+            .and_return(historical_prices)
+
+          
           post searches_url,
                params: { search: valid_attributes }, headers: valid_headers, as: :json
         end.to change(Search, :count).by(1)
       end
 
       it 'renders a JSON response with the new search' do
+        results = get_mock_price_data('aapl_historical.json')
+        results['symbol'] = valid_attributes[:ticker]
+        Apis::Api.subclasses.each do |klass|
+          allow_any_instance_of(klass).to receive(:query).and_return(results)
+        end
+
         post searches_url,
              params: { search: valid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
@@ -106,6 +131,12 @@ RSpec.describe '/searches', type: :request do
 
     context 'does not allow duplicate searches' do
       it 'prevents the user from creating a duplicate search' do
+        results = get_mock_price_data('aapl_historical.json')
+        results['symbol'] = 'DDD'
+        Apis::Api.subclasses.each do |klass|
+          allow_any_instance_of(klass).to receive(:query).and_return(results)
+        end
+
         post searches_url,
              params: { search: valid_attributes.update(ticker: 'DDD') },
              headers: valid_headers,
@@ -122,6 +153,12 @@ RSpec.describe '/searches', type: :request do
 
     context 'returns the company that we were searching for' do
       it 'returns the company information in the search result JSON body' do
+        results = get_mock_price_data('aapl_historical.json')
+        results['symbol'] = valid_attributes[:ticker]
+        Apis::Api.subclasses.each do |klass|
+          allow_any_instance_of(klass).to receive(:query).and_return(results)
+        end
+
         attributes = valid_attributes
         post searches_url,
              params: { search: attributes },

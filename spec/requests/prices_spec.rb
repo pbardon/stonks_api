@@ -98,11 +98,11 @@ RSpec.describe '/prices', type: :request do
 
       it 'updates the requested price' do
         price = @company.prices.create! valid_attributes
-        old_ticker = price.ticker
+        old_date = price.date
         patch company_price_url(@company.id, price),
               params: { price: new_attributes }, headers: valid_headers, as: :json
         price.reload
-        expect(price.ticker).to_not eq(old_ticker)
+        expect(price.date).to_not eq(old_date)
       end
 
       it 'renders a JSON response with the price' do

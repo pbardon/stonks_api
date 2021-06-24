@@ -56,6 +56,6 @@ class PricesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def price_params
-    params.require(:price).permit(:ticker, :open, :close, :high, :low, :volume, :timestamp, :querytype)
+    params.require(:price).permit(:ticker, :open, :close, :high, :low, :volume, :date, :timestamp, :querytype)
   end
 end
