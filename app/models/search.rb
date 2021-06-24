@@ -15,10 +15,10 @@ class Search < ApplicationRecord
     results = fetch_results
 
     # Process the results and save them to active record
-    create_or_refesh_company(results)
+    create_or_refresh_company(results)
   end
 
-  def create_or_refesh_company(results)
+  def create_or_refresh_company(results)
     # Create the prices for each historical price in the data set
     # Create the company if it does not exist
     company = Company.find_by_ticker(ticker)
@@ -35,14 +35,25 @@ class Search < ApplicationRecord
 
   def refresh_prices(company, results)
     # Create the prices for each historical price in the data set
-    company.prices.clear
     # Performance bottleneck, open a single transaction for all the prices
     ActiveRecord::Base.transaction do
-      results['historical'].each do |price_data|
+      process_prices(company, results) if results_more_recent(company, results)
+    end
+  end
+
+  def process_prices(company, results)
+    company.prices.clear
+    results['historical'].each do |price_data|
+      if company.price_is_new?(price_data)
         price = Apis::FinancialModelingPrepApi.parse_price(price_data)
         company.prices.create!(price)
       end
     end
+  end
+
+  def results_more_recent(company, results)
+    # For now keep this always true so we always update the prices
+    true
   end
 
   def fetch_results
