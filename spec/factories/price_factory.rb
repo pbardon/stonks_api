@@ -10,7 +10,13 @@ FactoryBot.define do
     high { Faker::Number.decimal(l_digits: 2) }
     low { Faker::Number.decimal(l_digits: 2) }
     volume { Faker::Number.number(digits: 5) }
+  end
 
-    company
+  trait :recent do
+    date { rand(10..29).days.ago }
+  end
+
+  trait :old do
+    date { rand(30..100).days.ago }
   end
 end
