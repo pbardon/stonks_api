@@ -45,7 +45,7 @@ class Search < ApplicationRecord
   def refresh_prices(company, price_list)
     # Create the prices for each historical price in the data set
     # Performance bottleneck, open a single transaction for all the prices
-    return if company.last_updated_today?
+    return false if company.last_updated_today?
 
     company.last_query_date = Date.current
     company.save!

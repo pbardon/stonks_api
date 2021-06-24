@@ -13,4 +13,7 @@ class Price < ApplicationRecord
 
   # Supports default view window of 30 days of historical price information
   scope :recent, -> { where('date > ?', 30.days.ago) }
+
+  # Support range query
+  scope :between_dates, ->(start_date, end_date) { where('date BETWEEN ? AND ?', start_date, end_date) }
 end

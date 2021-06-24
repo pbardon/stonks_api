@@ -13,24 +13,25 @@ class Company < ApplicationRecord
   # Order the price collection using the date field
   has_many :prices, -> { order(date: :asc) }
 
-  # Return the most recent price that we have stored in the DB
-  def most_recent_price
-    prices.first
-  end
-
-  def new_price?(price_data)
-    return false unless price_data['date']
-    if prices.find_by(date: price_data['date'])
-      false
-    else
-      true
-    end
-  end
-
   # Check if the most recent update was within the last day
   def last_updated_today?
     return false unless last_query_date
 
     !last_query_date.before?(Date.current)
+  end
+
+  # Return the most recent price that we have stored in the DB
+  def most_recent_price
+    prices.last
+  end
+
+  def new_price?(price_data)
+    return false unless price_data['date']
+
+    if prices.find_by(date: price_data['date'])
+      false
+    else
+      true
+    end
   end
 end

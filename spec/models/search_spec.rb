@@ -108,21 +108,11 @@ RSpec.describe Search, type: :model do
   end
 
   describe '#query_external_api' do
-
-    it 'validates that the response is correctly formatted' do
-      skip
-    end
-
-    it 'throws an error if the ticker does not match' do
-      skip
-    end
-
     it 'can retrieve the results from the api' do
       historical_prices = JSON.parse(File.open(
         "#{Rails.root}/spec/data/aapl_historical.json"
       ).read)
 
-      # TODO - fix this with better factories
       s = create(:search)
       s.ticker = s.company.ticker
       historical_prices['symbol'] = s.company.ticker
@@ -140,34 +130,33 @@ RSpec.describe Search, type: :model do
     end
   end
 
-  describe '#update_company_prices' do
-    it 'creates the company if it does not exist' do
-      s = build(:search)
-      s.date = Faker::Date.backward(days: 5)
-      og_date = s.date
-      s.ticker = "FOO"
-      results = Apis::FinancialModelingPrepApi.new(s.ticker, 'foo').find
-      s.update_company_prices(results['historical'])
-      expect(s.date).to_not be_nil
-      expect(s.date).to_not eq(og_date)
-    end
-
-    it 'refreshes the company if it does exist' do
-      s = build(:search)
-      s.date = Faker::Date.backward(days: 5)
-      og_date = s.date
-      c = create(:company)
-      s.ticker = c.ticker
-      results = Apis::FinancialModelingPrepApi.new(c.ticker, 'foo').find
-      s.update_company_prices(results['historical'])
-      expect(s.date).to eq(og_date)
-    end
-  end
-
   describe '#refresh_prices' do
-
     it 'only updates the price if the last query was older' do
-      skip
+      s = build(:search)
+      c = build(:company)
+      c.last_query_date = 1.day.ago
+      s.company = c
+      s.save!
+      old_results = JSON.parse(File.open(
+        "#{Rails.root}/spec/data/aapl_historical.json"
+      ).read)
+
+      s.refresh_prices(c, old_results['historical'])
+      sorted = c.prices
+      latest_price = sorted.last
+      expect(latest_price.date).to eq(Date.parse('2021-06-01'))
+
+      new_results = JSON.parse(File.open(
+        "#{Rails.root}/spec/data/aapl_updated_historical.json"
+      ).read)
+
+      c.last_query_date = Date.current
+      c.save!
+      expect(s.refresh_prices(c, new_results['historical'])).to be(false)
+      new_latest_price = c.prices.last
+
+      expect(new_latest_price).to eq(latest_price)
+      expect(new_latest_price.date).to eq(Date.parse('2021-06-01'))
     end
 
     it 'adds any new prices to the prices collection' do
@@ -199,13 +188,30 @@ RSpec.describe Search, type: :model do
     end
   end
 
-  describe '#results_more_recent' do
-    it 'checks if the prices need to be updated' do
-      company = build(:company)
-      search = build(:search)
-      # expect()
+  describe '#update_company_prices' do
+    it 'creates the company if it does not exist' do
+      s = build(:search)
+      s.date = Faker::Date.backward(days: 5)
+      og_date = s.date
+      s.ticker = 'DDD'
+      results = Apis::FinancialModelingPrepApi.new(s.ticker, 'foo').find
+      s.update_company_prices(results['historical'])
+      expect(s.date).to_not be_nil
+      expect(s.date).to_not eq(og_date)
+    end
+
+    it 'refreshes the company if it does exist' do
+      s = build(:search)
+      s.date = Faker::Date.backward(days: 5)
+      og_date = s.date
+      c = create(:company)
+      s.ticker = c.ticker
+      results = Apis::FinancialModelingPrepApi.new(c.ticker, 'foo').find
+      s.update_company_prices(results['historical'])
+      expect(s.date).to eq(og_date)
     end
   end
+
   describe '#validate_results' do
     it 'validates that the data matches the expected format' do
       search = build(:search)
