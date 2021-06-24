@@ -126,7 +126,21 @@
       "vwap" : 124.16333,
       "label" : "May 19, 21",
       "changeOverTime" : 0.01242
-    } 
+    },
+    {
+      "date" : "2021-04-19",
+      "open" : 123.16,
+      "high" : 124.92,
+      "low" : 122.88,
+      "close" : 124.69,
+      "adjClose" : 124.69,
+      "volume" : 8.6428018E7,
+      "unadjustedVolume" : 8.6428018E7,
+      "change" : 1.53,
+      "changePercent" : 1.242,
+      "vwap" : 124.16333,
+      "label" : "May 19, 21",
+      "changeOverTime" : 0.01242
+    }
   ]
-  
 }

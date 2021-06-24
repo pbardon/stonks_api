@@ -7,68 +7,76 @@ class Search < ApplicationRecord
 
   belongs_to :company, optional: true
 
-  def query_external_api
-    ## Execute search, fetch results from API, and return the search object
-    # Search result should contain link to the company object
-
-    # Fetch the prices from the API
-    results = fetch_results
-
-    # Process the results and save them to active record
-    create_or_refresh_company(results)
+  # Checks to see if this search has already been performed
+  def exists?
+    # We only allow one ticker to be refreshed per day
+    !!Search.find_by_ticker_and_date(ticker, Date.today)
   end
 
-  def create_or_refresh_company(results)
-    # Create the prices for each historical price in the data set
-    # Create the company if it does not exist
-    company = Company.find_by_ticker(ticker)
-    unless company
-      company = Company.new({ ticker: ticker })
-      self.date = Date.today
-      return false unless company.save
-    end
-
-    # Create or update the prices for each historical price in the data set
-    refresh_prices(company, results)
-    company
-  end
-
-  def refresh_prices(company, results)
-    # Create the prices for each historical price in the data set
-    # Performance bottleneck, open a single transaction for all the prices
-    ActiveRecord::Base.transaction do
-      process_prices(company, results) if results_more_recent(company, results)
-    end
-  end
-
-  def process_prices(company, results)
-    company.prices.clear
-    results['historical'].each do |price_data|
-      if company.price_is_new?(price_data)
+  # Create new entries in the database for any new prices
+  # @param [Company] company associated with the results
+  # @param [Array] price data for company in list format
+  def process_prices(company, price_list)
+    price_list.each do |price_data|
+      if company.new_price?(price_data)
         price = Apis::FinancialModelingPrepApi.parse_price(price_data)
         company.prices.create!(price)
       end
     end
   end
 
-  def results_more_recent(company, results)
-    # For now keep this always true so we always update the prices
-    true
-  end
+  ## Execute search, fetch results from API, and return the search object
+  def query_external_api
+    # Search result should contain link to the company object
 
-  def fetch_results
+    # Fetch the prices from the API
     fmp_api = Apis::FinancialModelingPrepApi.new(ticker, ENV['api_key'])
     results = fmp_api.find
-    raise "External API did not return key 'symbol' data" unless ticker
+
+    # Validate the result format
+    validate_results(results)
+
+    # Process the results and save them to active record
+    self.company = update_company_prices(results['historical'])
+    # Return Search result which contains link to the company object
+    self
+  end
+
+  def refresh_prices(company, price_list)
+    # Create the prices for each historical price in the data set
+    # Performance bottleneck, open a single transaction for all the prices
+    return if company.last_updated_today?
+
+    company.last_query_date = Date.current
+    company.save!
+
+    # Performance bottleneck, open a single transaction for all the prices
+    ActiveRecord::Base.transaction do
+      process_prices(company, price_list)
+    end
+
+    company
+  end
+
+  # Create the prices for each historical price in the data set
+  # @param [Hash<Symbol, String>] parsed JSON result
+  def update_company_prices(price_list)
+    # Create the company if it does not exist
+    company = Company.find_by_ticker(ticker)
+    unless company
+      company = Company.new({ ticker: ticker })
+      self.date = Date.today
+      raise "Unable to create company with ticker: #{ticker}" unless company.save
+    end
+
+    # Create or update the prices for each historical price in the data set
+    refresh_prices(company, price_list)
+  end
+
+  def validate_results(results)
+    raise "External API did not return key 'symbol' data" unless results['symbol']
     raise "External API did not return key 'historical' data" unless results['historical']
-    raise 'Search results don\'t match search query' unless results['symbol'] == ticker
-
-    results
+    raise "Search results don't match search query" unless results['symbol'] == ticker
   end
 
-  # Checks to see if this search has already been performed
-  def exists?
-    # We only allow one ticker to be refreshed per day
-    !!Search.find_by_ticker_and_date(ticker, Date.today)
-  end
 end

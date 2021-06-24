@@ -10,12 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_03_011428) do
+ActiveRecord::Schema.define(version: 2021_06_24_042248) do
 
   create_table "companies", force: :cascade do |t|
     t.string "ticker"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.date "last_query_date"
     t.index ["ticker"], name: "index_companies_on_ticker"
   end
 
@@ -31,6 +32,7 @@ ActiveRecord::Schema.define(version: 2021_06_03_011428) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "company_id"
     t.index ["company_id"], name: "index_prices_on_company_id"
+    t.index ["date"], name: "index_prices_on_date"
   end
 
   create_table "searches", force: :cascade do |t|

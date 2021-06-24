@@ -11,4 +11,6 @@ class Price < ApplicationRecord
 
   belongs_to :company
 
+  # Supports default view window of 30 days of historical price information
+  scope :recent, -> { where('date > ?', 30.days.ago) }
 end
