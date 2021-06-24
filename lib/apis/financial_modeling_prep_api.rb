@@ -9,8 +9,8 @@ module Apis
 
     URL_BASE = 'https://financialmodelingprep.com/api/v3/historical-price-full'
 
-    def initialize(ticker, api_key)
-      @api_key = api_key
+    def initialize(ticker)
+      @api_key = ENV['FMP_API_KEY']
       @ticker = ticker
       @request_count = 0
       @request_count_key = 'fmp_api_available_daily_requests'
