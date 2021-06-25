@@ -7,7 +7,7 @@ COPY Gemfile.lock /stonks/Gemfile.lock
 RUN bundle install
 
 ADD . /stonks
-RUN bundle exec rake db:migrate
+RUN RAILS_ENV=test bundle exec rake db:migrate
 ENV STONKS_SKIP_TEST_REQUESTS=true
 RUN bundle exec rspec
 

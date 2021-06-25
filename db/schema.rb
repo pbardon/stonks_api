@@ -12,6 +12,9 @@
 
 ActiveRecord::Schema.define(version: 2021_06_24_042248) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "companies", force: :cascade do |t|
     t.string "ticker"
     t.datetime "created_at", precision: 6, null: false
@@ -30,7 +33,7 @@ ActiveRecord::Schema.define(version: 2021_06_24_042248) do
     t.datetime "date"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "company_id"
+    t.bigint "company_id"
     t.index ["company_id"], name: "index_prices_on_company_id"
     t.index ["date"], name: "index_prices_on_date"
   end
@@ -40,7 +43,7 @@ ActiveRecord::Schema.define(version: 2021_06_24_042248) do
     t.date "date"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "company_id"
+    t.bigint "company_id"
     t.index ["company_id"], name: "index_searches_on_company_id"
     t.index ["date"], name: "index_searches_on_date"
     t.index ["ticker"], name: "index_searches_on_ticker"
