@@ -2,6 +2,7 @@
 
 # Search model used to record searches as well as the associated results
 class Search < ApplicationRecord
+  enum search_status: [:pending, :completed]
   validates :ticker, presence: true
   validates :ticker, length: { maximum: 5 }
 
