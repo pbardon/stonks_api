@@ -32,7 +32,9 @@ class Search < ApplicationRecord
     # Fetch the prices from the API
     fmp_api = Apis::FinancialModelingPrepApi.new(ticker)
     results = fmp_api.find
-
+    unless results
+      raise 'No results returned, you may be out of API requests'
+    end
     # Validate the result format
     validate_results(results)
 
