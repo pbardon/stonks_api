@@ -10,16 +10,22 @@ Only one search per ticker per day is allowed to ensure we are not making duplic
 
 * Ruby version - 3.0.1
 
-* System dependencies
+# System dependencies
 
-For development the only system dependency you will need is ruby, bundler, and redis. RVM is recommended to manage your Ruby version and installation. Redis can be installed and enabled with the following commands:
+For development the only system dependency you will need is ruby, bundler, and redis. 
 
-MacOS:
+## Ruby
+RVM is recommended to manage your Ruby version and installation. 
+
+## Redis 
+Redis can be installed and enabled with the following commands:
+
+* MacOS:
 ```
 brew install redis
 brew services start redis
 ```
-Ubuntu:
+* Ubuntu:
 
 ```
 sudo apt-get install redis-server
@@ -29,7 +35,7 @@ sudo systemctl enable redis-server.service
 If you need to debug the pipeline build you may also want Docker installed so that you can run the container build locally.
 
 
-* Database creation
+# Database creation
 First, you need to setup the database user and password:
 
 ```
@@ -44,7 +50,7 @@ In order to create the local Postgres database as well as the test SQLite3 datab
 bundle exec rake db:create
 ```
 
-* Database initialization
+# Database initialization
 In order to intialize the database, run the migration:
 
 ```
@@ -72,8 +78,9 @@ docker build -t stonks-api .
 ```
 
 
-* Deployment instructions
+# Deployment instructions
 
+## Heroku
 This app is deployed on Heroku, so deployment is really simple. Just run the following commands to push the latest code to the heroku app:
 
 ```
@@ -84,7 +91,7 @@ heroku run rake db:migrate
 
 This will deploy the latest version of the code to Heroku and run the database migration.
 
-* Secrets management
+## Secrets management
 
 We use the Figaro gem to manage our sesitive information. If running in development mode, you will need to create the following file:
 
@@ -118,31 +125,37 @@ curl --header "Content-Type: application/json" \
 Keep checking the returned URL until the search_status is 'completed' and the results of the search will be included in the returned JSON. By default the last 30 days on prices will be included in the body. If you want to request the information for a specific company along with the last 30 days of price information make the following request:
 
 ```
-curl --header "Content-Type: application/json" \                          
-  --request GET \  
+curl --header "Content-Type: application/json" \
+  --request GET \
   http://pure-anchorage-99304.herokuapp.com/companies/1
 ```
 
 You can also retrieve cached company and price data. In order to retrieve price data for a company use the following request:
 
 ```
-curl --header "Content-Type: application/json" \                          
-  --request GET \  
+curl --header "Content-Type: application/json" \
+  --request GET \
   http://pure-anchorage-99304.herokuapp.com/companies/1/prices
 ```
 
 You can also filter the price results using the following syntax:
 ```
-curl --header "Content-Type: application/json" \                           
-  --request GET \  
+curl --header "Content-Type: application/json" \
+  --request GET \
   http://pure-anchorage-99304.herokuapp.com/companies/1/prices\?start_date\=2021-05-25\&end_date\=2021-06-01
 ```
 
-Sorting for pricesis also supported like so:
+Sorting for prices is also supported like so:
 
 ```
-curl --header "Content-Type: application/json" \                           
-  --request GET \  
+curl --header "Content-Type: application/json"\
+  --request GET \
   http://pure-anchorage-99304.herokuapp.com/companies/1/prices\?sort_by\=high
 ```
+Sorting and filtering can also be combined:
 
+```
+curl --header "Content-Type: application/json" \
+  --request GET \
+  http://pure-anchorage-99304.herokuapp.com/companies/1/prices\?start_date\=2021-05-25\&end_date\=2021-06-01&sort_by\=high
+```
