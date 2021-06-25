@@ -25,6 +25,7 @@ module Apis
 
       decrement_request_count
       # query the api
+
       query
     end
 
@@ -34,7 +35,9 @@ module Apis
 
     def decrement_request_count
       count = Integer(@cache.get(@request_count_key))
+      new_count = count - 1
       @cache.set(@request_count_key, count - 1)
+      Rails.logger.info("#{new_count} API requests left today")
     end
 
     def api_key_set?
