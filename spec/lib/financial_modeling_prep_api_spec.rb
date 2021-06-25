@@ -51,6 +51,9 @@ RSpec.describe Apis::FinancialModelingPrepApi do
 
   describe('#query') do
     it 'can make a request to the FMP API' do
+      if ENV['STONKS_SKIP_TEST_REQUESTS']
+        skip 'Outbound request test disabled'
+      end
       mock_ticker = 'DDD'
       @api_client = Apis::FinancialModelingPrepApi.new(mock_ticker)
       result = @api_client.find

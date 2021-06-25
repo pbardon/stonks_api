@@ -8,7 +8,7 @@ RUN bundle install
 
 ADD . /stonks
 RUN bundle exec rake db:migrate
-
+ENV STONKS_SKIP_TEST_REQUESTS=true
 RUN bundle exec rspec
 
 # Add a script to be executed every time the container starts.
