@@ -30,7 +30,7 @@ class Search < ApplicationRecord
     # Search result should contain link to the company object
 
     # Fetch the prices from the API
-    fmp_api = Apis::FinancialModelingPrepApi.new(ticker, ENV['api_key'])
+    fmp_api = Apis::FinancialModelingPrepApi.new(ticker)
     results = fmp_api.find
 
     # Validate the result format

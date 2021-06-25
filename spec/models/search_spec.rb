@@ -2,11 +2,6 @@
 
 require 'rails_helper'
 
-def get_mock_price_data(filename)
-  return JSON.parse(File.open(
-    "#{Rails.root}/spec/data/#{filename}"
-  ).read)
-end
 
 RSpec.describe Search, type: :model do
   # Mock out the external API connector class
@@ -137,18 +132,14 @@ RSpec.describe Search, type: :model do
       c.last_query_date = 1.day.ago
       s.company = c
       s.save!
-      old_results = JSON.parse(File.open(
-        "#{Rails.root}/spec/data/aapl_historical.json"
-      ).read)
+      old_results = get_mock_price_data('aapl_historical.json')
 
       s.refresh_prices(c, old_results['historical'])
       sorted = c.prices
       latest_price = sorted.last
       expect(latest_price.date).to eq(Date.parse('2021-06-01'))
 
-      new_results = JSON.parse(File.open(
-        "#{Rails.root}/spec/data/aapl_updated_historical.json"
-      ).read)
+      new_results = get_mock_price_data('aapl_updated_historical.json')
 
       c.last_query_date = Date.current
       c.save!
@@ -165,19 +156,15 @@ RSpec.describe Search, type: :model do
       c.last_query_date = 2.days.ago
       s.company = c
       s.save!
-      old_results = JSON.parse(File.open(
-        "#{Rails.root}/spec/data/aapl_historical.json"
-      ).read)
+      old_results = get_mock_price_data('aapl_historical.json')
 
       s.refresh_prices(c, old_results['historical'])
       sorted = c.prices
       latest_price = sorted.last
       expect(latest_price.date).to eq(Date.parse('2021-06-01'))
 
-      new_results = JSON.parse(File.open(
-        "#{Rails.root}/spec/data/aapl_updated_historical.json"
-      ).read)
-
+      new_results = get_mock_price_data('aapl_updated_historical.json')
+      
       c.last_query_date = 1.day.ago
       c.save!
       s.refresh_prices(c, new_results['historical'])
@@ -194,7 +181,7 @@ RSpec.describe Search, type: :model do
       s.date = Faker::Date.backward(days: 5)
       og_date = s.date
       s.ticker = 'DDD'
-      results = Apis::FinancialModelingPrepApi.new(s.ticker, 'foo').find
+      results = get_mock_price_data('aapl_historical.json')
       s.update_company_prices(results['historical'])
       expect(s.date).to_not be_nil
       expect(s.date).to_not eq(og_date)
@@ -206,7 +193,7 @@ RSpec.describe Search, type: :model do
       og_date = s.date
       c = create(:company)
       s.ticker = c.ticker
-      results = Apis::FinancialModelingPrepApi.new(c.ticker, 'foo').find
+      results = get_mock_price_data('aapl_historical.json')
       s.update_company_prices(results['historical'])
       expect(s.date).to eq(og_date)
     end

@@ -46,3 +46,9 @@ RSpec.configure do |config|
   # triggering implicit auto-inclusion in groups with matching metadata.
   config.shared_context_metadata_behavior = :apply_to_host_groups
 end
+
+def get_mock_price_data(filename)
+  return JSON.parse(File.open(
+    "#{Rails.root}/spec/data/#{filename}"
+  ).read)
+end

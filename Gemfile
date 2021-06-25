@@ -27,6 +27,10 @@ gem 'bootsnap', '>= 1.4.4', require: false
 
 gem 'httparty'
 
+gem 'redis-rails'
+
+gem 'figaro'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
@@ -34,6 +38,11 @@ group :development, :test do
   gem 'factory_bot'
   gem 'faker'
   gem 'rubocop'
+end
+
+group :test do
+  gem "rspec"
+  gem "fakeredis", :require => "fakeredis/rspec"
 end
 
 group :development do
