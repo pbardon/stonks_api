@@ -7,6 +7,7 @@ class ExecuteApiQueryJob < ApplicationJob
     search.query_external_api
     # Associate the search with the company
     search.company = Company.find_by_ticker(search.ticker)
+    search.search_status = :completed
     search.save!
   end
 end

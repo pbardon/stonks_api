@@ -140,6 +140,7 @@ RSpec.describe '/searches', type: :request do
         expect(response).to have_http_status(:created)
         body = JSON.parse(response.body)
         expect(body['ticker']).to eq(attributes[:ticker])
+        expect(body['search_status']).to eq('pending')
       end
     end
   end
