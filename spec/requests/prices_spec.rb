@@ -33,7 +33,7 @@ RSpec.describe '/prices', type: :request do
   let(:valid_headers) { {} }
 
   before(:each) do
-    @company = create(:company)
+    @company = company_with_prices
   end
 
   after(:each) do
@@ -42,9 +42,50 @@ RSpec.describe '/prices', type: :request do
 
   describe 'GET /index' do
     it 'renders a successful response' do
-      @company.prices.create! valid_attributes
       get company_prices_url(@company.id), headers: valid_headers, as: :json
       expect(response).to be_successful
+    end
+
+    it 'filters on the date field' do
+      query_string = "start_date=#{15.days.ago.to_date}&end_date=#{1.day.ago.to_date}"
+      get "#{company_prices_url(@company.id)}?#{query_string}",
+          headers: valid_headers,
+          as: :json
+      expect(response).to be_successful
+      body = JSON.parse(response.body)
+      unless body.empty?
+        price_date = Date.parse(body[0]['date'])
+        expect(price_date.before?(1.day.ago)).to be(true)
+        expect(price_date.after?(16.days.ago)).to be(true)
+      end
+    end
+
+    it 'throws an error for invalid date' do
+      query_string = "start_date=#{15.days.ago.to_date}&end_date=foo"
+      expect do
+        get "#{company_prices_url(@company.id)}?#{query_string}",
+            headers: valid_headers,
+            as: :json
+      end.to raise_error(Date::Error)
+    end
+
+    it 'sorts by any field' do
+      query_string = 'sort_by=open'
+      get "#{company_prices_url(@company.id)}?#{query_string}",
+          headers: valid_headers,
+          as: :json
+      expect(response).to be_successful
+      body = JSON.parse(response.body)
+      expect(body[0]['open'] < body[-1]['open']).to be(true)
+    end
+
+    it 'throws an error for an invalid field' do
+      query_string = 'sort_by=price'
+      expect do
+        get "#{company_prices_url(@company.id)}?#{query_string}",
+            headers: valid_headers,
+            as: :json
+      end.to raise_error(NoMethodError)
     end
   end
 
