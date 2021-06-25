@@ -76,31 +76,17 @@ RSpec.describe '/searches', type: :request do
   end
 
   describe 'POST /create' do
-    def mock_fmp_api(ticker = nil)
-      historical_prices = get_mock_price_data('aapl_historical.json')
-      historical_prices['symbol'] = valid_attributes[:ticker]
-      historical_prices['symbol'] = ticker if ticker
-
-      allow(Apis::FinancialModelingPrepApi)
-        .to receive(:new)
-        .and_return(api_connector)
-
-      allow(api_connector)
-        .to receive(:find)
-        .and_return(historical_prices)
-    end
-
     context 'with valid parameters' do
       it 'creates a new Search' do
         expect do
-          mock_fmp_api
+          mock_fmp_api(valid_attributes[:ticker])
           post searches_url,
                params: { search: valid_attributes }, headers: valid_headers, as: :json
         end.to change(Search, :count).by(1)
       end
 
       it 'renders a JSON response with the new search' do
-        mock_fmp_api
+        mock_fmp_api(valid_attributes[:ticker])
         post searches_url,
              params: { search: valid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
@@ -144,7 +130,7 @@ RSpec.describe '/searches', type: :request do
 
     context 'returns the company that we were searching for' do
       it 'returns the company information in the search result JSON body' do
-        mock_fmp_api
+        mock_fmp_api(valid_attributes[:ticker])
 
         attributes = valid_attributes
         post searches_url,
@@ -157,52 +143,6 @@ RSpec.describe '/searches', type: :request do
         expect(Company.find_by_ticker(body['ticker']).ticker).to eq(attributes[:ticker])
         expect(body['company']['prices']).to_not be_nil
       end
-    end
-  end
-
-  describe 'PATCH /update' do
-    new_stock_ticker = 'AAPL'
-    context 'with valid parameters' do
-      let(:new_attributes) do
-        new_attributes = valid_attributes
-        new_attributes.update(ticker: new_stock_ticker)
-        new_attributes
-      end
-
-      it 'updates the requested search' do
-        search = Search.create! valid_attributes
-        patch search_url(search),
-              params: { search: new_attributes }, headers: valid_headers, as: :json
-        search.reload
-        expect(search.ticker).to eq(new_stock_ticker)
-      end
-
-      it 'renders a JSON response with the search' do
-        search = Search.create! valid_attributes
-        patch search_url(search),
-              params: { search: new_attributes }, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:ok)
-        expect(response.content_type).to match(a_string_including('application/json'))
-      end
-    end
-
-    context 'with invalid parameters' do
-      it 'renders a JSON response with errors for the search' do
-        search = Search.create! valid_attributes
-        patch search_url(search),
-              params: { search: invalid_attributes }, headers: valid_headers, as: :json
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to match(a_string_including('application/json'))
-      end
-    end
-  end
-
-  describe 'DELETE /destroy' do
-    it 'destroys the requested search' do
-      search = Search.create! valid_attributes
-      expect do
-        delete search_url(search), headers: valid_headers, as: :json
-      end.to change(Search, :count).by(-1)
     end
   end
 end

@@ -32,6 +32,20 @@ class SearchesController < ApplicationController
     end
   end
 
+  private
+
+  def query_successful?
+    results = @search.query_external_api
+
+    # Ensure we got results from the API
+    unless results
+      render json: 'Unable to retrieve query results', status: :internal_server_error
+      return false
+    end
+
+    true
+  end
+
   def search_valid?
     # Validate the object first
     unless @search.valid?
@@ -46,34 +60,6 @@ class SearchesController < ApplicationController
 
     true
   end
-
-  def query_successful?
-    results = @search.query_external_api
-
-    # Ensure we got results from the API
-    unless results
-      render json: 'Unable to retrieve query results', status: :internal_server_error
-      return false
-    end
-
-    true
-  end
-
-  # PATCH/PUT /searches/1
-  def update
-    if @search.update(search_params)
-      render json: @search
-    else
-      render json: @search.errors, status: :unprocessable_entity
-    end
-  end
-
-  # DELETE /searches/1
-  def destroy
-    @search.destroy
-  end
-
-  private
 
   # Use callbacks to share common setup or constraints between actions.
   def set_search

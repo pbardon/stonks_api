@@ -2,7 +2,6 @@
 
 require 'rails_helper'
 
-
 RSpec.describe Search, type: :model do
   # Mock out the external API connector class
   let(:api_connector) do
@@ -47,12 +46,12 @@ RSpec.describe Search, type: :model do
   describe '#exists?' do
     it 'validates uniqueness for a specific date and time' do
       s1 = build(:search)
-      s1.ticker = "DDD"
+      s1.ticker = 'DDD'
       s1.date = Date.today
       s1.save
 
       s2 = build(:search)
-      s2.ticker = "DDD"
+      s2.ticker = 'DDD'
       s2.date = Date.today
       expect(s2.exists?).to be true
     end
@@ -104,21 +103,9 @@ RSpec.describe Search, type: :model do
 
   describe '#query_external_api' do
     it 'can retrieve the results from the api' do
-      historical_prices = JSON.parse(File.open(
-        "#{Rails.root}/spec/data/aapl_historical.json"
-      ).read)
-
       s = create(:search)
-      s.ticker = s.company.ticker
-      historical_prices['symbol'] = s.company.ticker
 
-      allow(Apis::FinancialModelingPrepApi)
-        .to receive(:new)
-        .and_return(api_connector)
-
-      allow(api_connector)
-        .to receive(:find)
-        .and_return(historical_prices)
+      mock_fmp_api(s.ticker)
       search = s.query_external_api
       expect(search.date).to_not be_nil
       expect(search.company.last_query_date).to eq(Date.current)
@@ -164,7 +151,7 @@ RSpec.describe Search, type: :model do
       expect(latest_price.date).to eq(Date.parse('2021-06-01'))
 
       new_results = get_mock_price_data('aapl_updated_historical.json')
-      
+
       c.last_query_date = 1.day.ago
       c.save!
       s.refresh_prices(c, new_results['historical'])
@@ -213,7 +200,7 @@ RSpec.describe Search, type: :model do
       search.ticker = 'NVDA'
       mock_results = { 'historical' => [], 'symbol' => 'NVDA' }
       search.validate_results(mock_results)
-      mock_invalid_results = { 'historical' => [], 'symbol' =>'AAPL' }
+      mock_invalid_results = { 'historical' => [], 'symbol' => 'AAPL' }
       expect { search.validate_results(mock_invalid_results) }.to raise_exception(
         "Search results don't match search query"
       )
