@@ -8,4 +8,4 @@ test:
   <<: *default
 production:
   <<: *default
-  url: redis://herokuhost:6379
+  url: <%= ENV['REDIS_URL'] =>
