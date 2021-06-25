@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+company = company || @company
+
 json.extract! company, :ticker, :created_at, :updated_at
 json.url company_url(company, format: :json)
 
