@@ -48,7 +48,20 @@ RSpec.configure do |config|
 end
 
 def get_mock_price_data(filename)
-  return JSON.parse(File.open(
+  JSON.parse(File.open(
     "#{Rails.root}/spec/data/#{filename}"
   ).read)
+end
+
+def mock_fmp_api(ticker = nil)
+  historical_prices = get_mock_price_data('aapl_historical.json')
+  historical_prices['symbol'] = ticker if ticker
+
+  allow(Apis::FinancialModelingPrepApi)
+    .to receive(:new)
+    .and_return(api_connector)
+
+  allow(api_connector)
+    .to receive(:find)
+    .and_return(historical_prices)
 end
