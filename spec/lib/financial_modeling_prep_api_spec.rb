@@ -9,6 +9,9 @@ RSpec.describe Apis::FinancialModelingPrepApi do
     it('can create the api client') do
       expect(@api_client.ticker).to_not be_nil
       expect(@api_client.url).to_not be_nil
+      if ENV['STONKS_SKIP_TEST_REQUESTS']
+        skip 'API key not set in container build for security'
+      end
       expect(@api_client.api_key_set?).to be true
     end
 
