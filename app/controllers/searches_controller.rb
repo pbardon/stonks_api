@@ -20,12 +20,9 @@ class SearchesController < ApplicationController
   def create
     @search = Search.new(search_params)
     return unless search_valid?
-    return unless query_successful?
-
-    # Associate the search with the company
-    @search.company = Company.find_by_ticker(@search.ticker)
 
     if @search.save
+      ExecuteApiQueryJob.perform_later(@search.id)
       render status: :created
     else
       render json: @search.errors, status: :unprocessable_entity
@@ -34,16 +31,11 @@ class SearchesController < ApplicationController
 
   private
 
-  def query_successful?
-    results = @search.query_external_api
-
-    # Ensure we got results from the API
-    unless results
-      render json: 'Unable to retrieve query results', status: :internal_server_error
-      return false
-    end
-
-    true
+  def execute_query(search_id)
+    search = Search.find(search_id)
+    search.query_external_api
+    # Associate the search with the company
+    search.company = Company.find_by_ticker(search.ticker)
   end
 
   def search_valid?

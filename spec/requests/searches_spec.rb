@@ -128,8 +128,8 @@ RSpec.describe '/searches', type: :request do
       end
     end
 
-    context 'returns the company that we were searching for' do
-      it 'returns the company information in the search result JSON body' do
+    context 'returns the search information immediately' do
+      it 'includes the status of the search' do
         mock_fmp_api(valid_attributes[:ticker])
 
         attributes = valid_attributes
@@ -140,8 +140,6 @@ RSpec.describe '/searches', type: :request do
         expect(response).to have_http_status(:created)
         body = JSON.parse(response.body)
         expect(body['ticker']).to eq(attributes[:ticker])
-        expect(Company.find_by_ticker(body['ticker']).ticker).to eq(attributes[:ticker])
-        expect(body['company']['prices']).to_not be_nil
       end
     end
   end
